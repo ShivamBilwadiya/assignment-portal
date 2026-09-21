@@ -23,11 +23,25 @@ app.post("/assignments", async (req, res) => {
     }
 });
 
-// GET /assignments - Return all assignments (newest first)
+// GET /assignments - Return all assignments (or filtered by submitted status)
 app.get("/assignments", async (req, res) => {
     try {
+        const { submitted } = req.query;
+
+        if (submitted !== undefined) {
+            const query = `
+                SELECT *
+                FROM assignments
+                WHERE submitted = $1
+                ORDER BY id DESC;
+            `;
+            const result = await pool.query(query, [submitted]);
+            return res.status(200).json(result.rows);
+        }
+
         const query = `
-            SELECT * FROM assignments
+            SELECT *
+            FROM assignments
             ORDER BY id DESC;
         `;
         const result = await pool.query(query);
