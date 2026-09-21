@@ -23,6 +23,21 @@ app.post("/assignments", async (req, res) => {
     }
 });
 
+// GET /assignments - Return all assignments (newest first)
+app.get("/assignments", async (req, res) => {
+    try {
+        const query = `
+            SELECT * FROM assignments
+            ORDER BY id DESC;
+        `;
+        const result = await pool.query(query);
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 if (require.main === module) {
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
