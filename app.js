@@ -59,6 +59,29 @@ app.patch("/assignments/:id", async (req, res) => {
     }
 });
 
+// DELETE /assignments/:id - Delete an assignment
+app.delete("/assignments/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const query = `
+            DELETE FROM assignments
+            WHERE id = $1
+            RETURNING *;
+        `;
+        const result = await pool.query(query, [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Assignment not found" });
+        }
+        res.status(200).json({
+            message: "Assignment deleted successfully",
+            assignment: result.rows[0]
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 if (require.main === module) {
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
